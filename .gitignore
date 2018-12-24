@@ -1,0 +1,6 @@
+._*
+.vscode/
+Gemfile.lock
+.idea/*
+PreMatch-*.json
+secrets.*
