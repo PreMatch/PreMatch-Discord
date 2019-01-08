@@ -1,13 +1,18 @@
 require 'google/cloud/datastore'
+require './json_definition'
 
 class Database
   def initialize
     @datastore = Google::Cloud::Datastore.new project: PROJECT_ID
   end
 
-  def read_schedule(handle)
+  def read_schedule(handle, semester)
     key = @datastore.key 'Schedule', handle
-    @datastore.find key
+    entity = @datastore.find key
+
+    Hash[CurrentCalendar.definition.blocks.map do |block|
+      [block, entity[block + semester.to_s]]
+    end]
   end
 
   def register_association(user_id, handle)

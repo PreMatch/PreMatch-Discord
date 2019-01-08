@@ -1,4 +1,5 @@
 require './database'
+require './json_definition'
 
 class PersonalResponder
 
@@ -10,9 +11,8 @@ class PersonalResponder
     @handle = handle
     @call_time = without_date(call_time)
     @event = command_event
-
-    @user_schedule = database.read_schedule(handle)
     @call_date = call_time.to_date
+    @database = database
 
     return unless Calendar.current.includes? @call_date
     return if @user_schedule.nil?
@@ -27,12 +27,21 @@ class PersonalResponder
       @event.send_message ':calendar: We are not in the currently defined calendar year. Is this summer?'
       return
     end
-    if @user_schedule.nil?
-      @event.send_message ":dizzy_face: I couldn't find your schedule."
-      return
-    end
     unless Discord.channel_verified @event.channel
       @event.send_message ":no_entry: This is not a verified AHS-only server."
+      return
+    end
+
+    @semester = CurrentCalendar.definition.semester_of(@call_date)
+    if @semester.nil?
+      @event.send_message ":interrobang: The current date doesn't apply to any semester."
+      return
+    end
+
+    @user_schedule = @database.read_schedule(handle, @semester)
+
+    if @user_schedule.nil?
+      @event.send_message ":dizzy_face: I couldn't find your schedule."
       return
     end
 
@@ -42,7 +51,7 @@ class PersonalResponder
 
     @event.channel.send_embed do |embed|
       embed.author = Discord.embed_author
-      embed.title = "Today is #{@call_day.description}"
+      embed.title = "Today is #{@call_day.description} of Semester #{@semester}"
       embed.description = @target_message
       render_schedule_field(embed)
     end
