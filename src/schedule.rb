@@ -35,8 +35,6 @@ class Period < TimeRange
   end
 end
 
-require './current_schedule'
-
 class Schedule < TimeRange
   def self.of_day(day)
     definition = CurrentCalendar.definition
@@ -46,7 +44,7 @@ class Schedule < TimeRange
     when HalfDay
       Schedule.new(periods_from_ranges_blocks(definition.half_day_periods, day.blocks))
     when ExamDay
-      Schedule.new(periods_from_ranges_blocks(definition.exam_day_periods, day.blocks + ['Academic Support']))
+      Schedule.new(periods_from_ranges_blocks(definition.exam_day_periods, day.test_blocks + ['Academic Support']))
     when UnknownDay, Holiday
       return nil
     else
