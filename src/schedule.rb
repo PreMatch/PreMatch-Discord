@@ -39,14 +39,22 @@ require './current_schedule'
 
 class Schedule < TimeRange
   def self.of_day(day)
+    definition = CurrentCalendar.definition
     case day
-    when StandardDay, ExamDay, HalfDay
-      Schedule.new(CurrentSchedule.periods_of_day(day))
+    when StandardDay
+      Schedule.new(periods_from_ranges_blocks(definition.periods, definition.blocks_of_day(day.number)))
+    when HalfDay
+      Schedule.new(periods_from_ranges_blocks(definition.half_day_periods, day.blocks))
+    when ExamDay
+      Schedule.new(periods_from_ranges_blocks(definition.exam_day_periods, day.blocks + ['Academic Support']))
     when UnknownDay, Holiday
       return nil
     else
       raise Exception, 'Unknown type of day passed to Schedule.of_day'
     end
+  end
+  def self.periods_from_ranges_blocks(ranges, blocks)
+    ranges.zip(blocks).map { |range, block| Period.from_range(range, block) }
   end
 
   attr_reader :periods

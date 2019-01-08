@@ -1,16 +1,23 @@
 require './calendar_days'
 
-class Exclusion
+class DateRange
   attr_reader :start_date, :end_date
 
-  def initialize(start, end_date, day)
-    @start_date = start
+  def initialize(start_date, end_date)
+    @start_date = start_date
     @end_date = end_date
-    @day = day
   end
 
   def includes?(date)
     (date >= @start_date) && (date <= @end_date)
+  end
+end
+
+class Exclusion < DateRange
+
+  def initialize(start, end_date, day)
+    super(start, end_date)
+    @day = day
   end
 
   def included_day
@@ -18,25 +25,23 @@ class Exclusion
   end
 end
 
-require './current_calendar'
+require './json_definition'
 
 class Calendar
   def self.current
-    Calendar.new(CurrentCalendar.overrides,
-                 CurrentCalendar.exclusions,
-                 CurrentCalendar.start_date,
-                 CurrentCalendar.end_date)
+    Calendar.new(CurrentCalendar.definition)
   end
 
-  attr_reader :overrides, :exclusions
+  attr_reader :overrides, :exclusions, :definition
 
-  def initialize(overrides, exclusions, start_date, end_date)
-    @overrides = overrides
-    @exclusions = exclusions
-    @correlations = {start_date => 1}
+  def initialize(definition)
+    @overrides = definition.overrides
+    @exclusions = definition.exclusions
+    @correlations = {definition.start_date => 1}
 
-    @start_date = start_date
-    @end_date = end_date
+    @start_date = definition.start_date
+    @end_date = definition.end_date
+    @definition = definition
   end
 
   def excluded?(date)
@@ -67,6 +72,10 @@ class Calendar
       break unless day_on(date).is_a? Holiday
     end
     date
+  end
+
+  def name
+    @definition.name
   end
 
   private
