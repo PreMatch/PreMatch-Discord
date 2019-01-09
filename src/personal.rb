@@ -15,7 +15,6 @@ class PersonalResponder
     @database = database
 
     return unless Calendar.current.includes? @call_date
-    return if @user_schedule.nil?
     return unless Discord.channel_verified @event.channel
 
     @call_day = Calendar.current.day_on @call_date
@@ -38,7 +37,7 @@ class PersonalResponder
       return
     end
 
-    @user_schedule = @database.read_schedule(handle, @semester)
+    @user_schedule = @database.read_schedule(@handle, @semester)
 
     if @user_schedule.nil?
       @event.send_message ":dizzy_face: I couldn't find your schedule."
