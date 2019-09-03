@@ -26,9 +26,11 @@ class PersonalResponder
       @event.send_message ':calendar: We are not in the currently defined calendar year. Is this summer?'
       return
     end
-    unless Discord.channel_verified @event.channel
-      @event.send_message ":no_entry: This is not a verified AHS-only server."
-      return
+
+    @destination_channel = @event.author.pm
+
+    if Discord.channel_verified @event.channel
+      @destination_channel = @event.channel
     end
 
     @semester = CurrentCalendar.definition.semester_of(@call_date)
@@ -48,7 +50,7 @@ class PersonalResponder
     @target_date = target_date
     @target_message = target_message
 
-    @event.channel.send_embed do |embed|
+    @destination_channel.send_embed do |embed|
       embed.author = Discord.embed_author
       embed.title = "Today is #{@call_day.description} of Semester #{@semester}"
       embed.description = @target_message
