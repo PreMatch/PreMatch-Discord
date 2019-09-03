@@ -6,7 +6,7 @@ class PersonalResponder
   # @param [String] handle
   # @param [Time] call_time
   # @param [Discordrb::Commands::CommandEvent] command_event
-  # @param [Google::Cloud::Datastore] database
+  # @param [Database] database
   def initialize(handle, call_time, command_event, database)
     @handle = handle
     @call_time = without_date(call_time)
@@ -15,7 +15,6 @@ class PersonalResponder
     @database = database
 
     return unless Calendar.current.includes? @call_date
-    return unless Discord.channel_verified @event.channel
 
     @call_day = Calendar.current.day_on @call_date
     @call_schedule = Schedule.of_day @call_day
@@ -29,7 +28,7 @@ class PersonalResponder
 
     @destination_channel = @event.author.pm
 
-    if Discord.channel_verified @event.channel
+    if Bot.channel_verified @event.channel
       @destination_channel = @event.channel
     end
 

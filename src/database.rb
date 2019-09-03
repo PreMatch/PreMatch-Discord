@@ -37,6 +37,10 @@ class Database
     nil
   end
 
+  def is_verified_guild?(id)
+    @store.doc('discord/verified_guilds').get.data[:ids].include? id.to_s
+  end
+
   private
 
   PROJECT_ID = 'prematch-db'.freeze

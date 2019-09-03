@@ -8,9 +8,6 @@ require 'discordrb'
 require 'openssl'
 
 $discord_auth_url = 'https://discordapp.com/api/oauth2/authorize?client_id=418089369942097921&redirect_uri=https%3A%2F%2Fprematch.org%2Fdiscord&response_type=code&scope=identify'.freeze
-$verified_guilds = [
-    365183228459352067
-]
 
 module Discord
   def self.auth_state(caller_id)
@@ -20,10 +17,6 @@ module Discord
 
   def self.auth_url(caller_id)
     "https://discordapp.com/api/oauth2/authorize?client_id=418089369942097921&redirect_uri=https%3A%2F%2Fprematch.org%2Fdiscord&response_type=code&scope=identify&state=#{auth_state(caller_id)}".freeze
-  end
-
-  def self.channel_verified(channel)
-    (channel.type == 0 && $verified_guilds.include?(channel.server.id)) or channel.type == 1
   end
 
   def self.embed_author
@@ -39,6 +32,10 @@ module Bot
   def self.initialize
     @calendar = Calendar.current
     @database = Database.new
+  end
+
+  def self.channel_verified(channel)
+    (channel.type == 0 && @database.is_verified_guild?(channel.server.id)) or channel.type == 1
   end
 
   def self.personalize(init_event)
