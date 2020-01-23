@@ -116,9 +116,13 @@ class PersonalResponder
       return
     end
 
+    target_semester = CurrentCalendar.definition.semester_of @target_date
+    target_user_schedule = target_semester == @semester ? @user_schedule :
+                               @database.read_schedule(@handle, target_semester)
+
     prev_index, next_index = target_schedule.periods_indices_before_after_time(@call_time)
     field_value = target_schedule.periods.map.with_index do |p, i|
-      teacher = @user_schedule[p.block]
+      teacher = target_user_schedule[p.block]
       content = teacher.nil? ? p.block : p.block + " → " + teacher
 
       if [Situation::DURING_PERIOD, Situation::BETWEEN_PERIODS].include? @situation
